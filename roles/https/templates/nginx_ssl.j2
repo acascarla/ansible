@@ -1,0 +1,32 @@
+upstream {{ project_name }}_ssl {
+    server unix:{{ venv.wsgi.socket_folder }}/{{ venv.wsgi.socket_name }};
+}
+
+server {
+    listen      {{ nginx.ssl_port }} ssl;
+    server_name {{ nginx.server_name }};
+
+    ssl_certificate /etc/letsencrypt/live/{{ nginx.server_name }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ nginx.server_name }}/privkey.pem; # managed by Certbot
+    ssl_session_cache   shared:SSL:300m;
+    ssl_session_timeout 300m;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         AES128-SHA:AES256-SHA:RC4-SHA:DES-CBC3-SHA:RC4-MD5;
+
+    # max upload size
+    client_max_body_size 75M;
+
+    location /static {
+        alias {{ django_static_root }};
+    }
+
+    location /uploads {
+        alias {{ django_media_root }};
+    }
+
+    location / {
+        include             uwsgi_params;
+        uwsgi_pass          {{ project_name }}_ssl;
+        uwsgi_read_timeout  {{ nginx_uwsgi_read_timeout }};
+    }
+}

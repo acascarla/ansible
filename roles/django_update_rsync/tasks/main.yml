@@ -1,0 +1,50 @@
+- name: clone bitbucket repo
+  git:
+    repo: '{{ git.url }}'
+    dest: '{{ tmp.git }}'
+    version: '{{ git.version }}'
+    accept_hostkey: yes
+    key_file: '{{ git.key_file }}'
+  delegate_to: localhost
+
+- name: wheel directory
+  file:
+    path: '{{ tmp.wheel }}'
+    state: directory
+    mode: 0755
+  delegate_to: localhost
+
+- name: pip wheel
+  command: 'pip3 wheel {{ tmp.git }} --no-deps --wheel-dir={{ tmp.wheel }}'
+  delegate_to: localhost
+
+- name: rsync to tmp
+  synchronize:
+    src: '{{ tmp.wheel }}'
+    dest: '{{ tmp.root }}'
+
+- name: venv pip install django module # also creates venv first time
+  pip:
+    name: '{{ tmp.wheel }}/{{ wheel.name }}-{{ wheel.version }}-{{ wheel.sufix }}'
+    virtualenv: '{{ virtualenv_folder }}'
+    virtualenv_python: python3.6
+    extra_args: '{{ pip.extra_args }}'
+  become: True
+  become_user: '{{ system_user.name }}'
+
+- name: remove wheel directory
+  file:
+    dest: '{{ tmp.wheel }}'
+    state: absent
+
+- name: django migrate
+  django_manage:
+    command: migrate
+    app_path: '{{ virtualenv_folder }}'
+    virtualenv: '{{ virtualenv_folder }}'
+
+- name: django collect static
+  django_manage:
+    command: collectstatic
+    app_path: '{{ virtualenv_folder }}'
+    virtualenv: '{{ virtualenv_folder }}'

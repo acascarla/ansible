@@ -1,0 +1,71 @@
+---
+- hosts: tryton
+  tasks:
+  - name: service cron stop
+    service:
+      name: '{{ service_trytondcron_name }}'
+      state: stopped
+    ignore_errors: yes
+
+- hosts: all
+  tasks:
+  - name: stop uwsgi vassal
+    file:
+      name: '{{ vassals_folder }}/{{ venv.wsgi.vassal_filename }}'
+      state: absent
+    ignore_errors: yes
+
+  - name: close connections in {{ db.name }}
+    environment:
+      PGHOST: '{{ db.host }}'
+      PGDATABASE: postgres
+      PGUSER: '{{ db.admin_user }}'
+      PGPASSWORD: '{{ db.admin_password }}'
+    shell: psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '{{ db.name }}' AND pid <> pg_backend_pid();"
+
+  - name: drop database
+    postgresql_db:
+      login_host: '{{ db.host }}'
+      login_user: '{{ db.admin_user }}'
+      login_password: '{{ db.admin_password }}'
+      name: '{{ db.name }}'
+      state: absent
+    become: yes
+    become_user: postgres
+
+- hosts: all
+  roles:
+  - pg_config
+
+- hosts: all
+  tasks:
+  - name: close connections in template1
+    environment:
+      PGHOST: '{{ db.host }}'
+      PGDATABASE: '{{ project_name }}'
+      PGUSER: '{{ db.user }}'
+      PGPASSWORD: '{{ db.password }}'
+    shell: psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'template1' AND pid <> pg_backend_pid();"
+
+  - name: pg_restore
+    environment:
+      PGHOST: '{{ db.host }}'
+      PGDATABASE: '{{ db.name }}'
+      PGUSER: '{{ db.user }}'
+      PGPASSWORD: '{{ db.password }}'
+    shell: pg_restore -h {{ db.host }} -U {{ db.user }} --no-owner --role={{ db.user }} --dbname={{ db.name }} /tmp/{{ project_name }}.dump
+    ignore_errors: yes
+
+  - name: start uwsgi vassal
+    file:
+      src: '{{ venv.wsgi.config_folder }}/{{ venv.wsgi.vassal_filename }}'
+      dest: '{{ vassals_folder }}/{{ venv.wsgi.vassal_filename }}'
+      state: link
+
+- hosts: tryton
+  tasks:
+  - name: start trytond-cron
+    service:
+      name: '{{ service_trytondcron_name }}'
+      state: started
+    ignore_errors: yes

@@ -1,0 +1,16 @@
+tmp:
+  root: /tmp
+  git: '/tmp/{{ django_site }}'
+  wheel: '/tmp/wheel'
+git:
+  account: oalfonso_o
+  repo: '{{ django_site }}'
+  url: 'git@bitbucket.org:oalfonso_o/{{ django_site }}.git'
+  version: master
+  key_file: /home/oriol/.ssh/id_rsa
+wheel:
+  name: '{{ python_module_prefix }}_{{ django_site }}'
+  version: 0.0.1
+  sufix: py3-none-any.whl
+pip:
+  extra_args: --upgrade --upgrade-strategy eager

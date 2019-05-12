@@ -1,0 +1,24 @@
+server {
+    listen      {{ nginx.port }};
+    server_name {{ nginx.server_name }};
+    # include letsencrypt conf
+
+    # redirect http to https
+
+    # max upload size
+    client_max_body_size 75M;
+
+    location /static {
+        alias {{ django_static_root }};
+    }
+
+    location /uploads {
+        alias {{ django_media_root }};
+    }
+
+    location / {
+        include             uwsgi_params;
+        uwsgi_pass          unix:{{ venv.wsgi.socket_folder }}/{{ venv.wsgi.socket_name }};
+        uwsgi_read_timeout  {{ nginx_uwsgi_read_timeout }};
+    }
+}

@@ -1,0 +1,34 @@
+- name: ensure uwsgi is installed
+  apt:
+    name: '{{ apt_packages }}'
+
+- name: template emperor.ini
+  template:
+    src: emperor.ini.j2
+    dest: /etc/uwsgi-emperor/emperor.ini
+    owner: root
+    group: root
+    mode: 0644
+
+- name: uwsgi-emperor vassals folder
+  file:
+    path: '{{ vassals_folder }}'
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
+- name: template virtualenv vassal.ini
+  template:
+    src: vassal.ini.j2
+    dest: '{{ venv.wsgi.config_folder }}/{{ venv.wsgi.vassal_filename }}'
+    owner: '{{ system_user.name }}'
+    group: '{{ system_user.name }}'
+    mode: 0644
+
+- name: link virtualenv vassal.ini to vassals folder
+  file:
+    src: '{{ venv.wsgi.config_folder }}/{{ venv.wsgi.vassal_filename }}'
+    dest: '{{ vassals_folder }}/{{ venv.wsgi.vassal_filename }}'
+    state: link
+  notify: restart emperor

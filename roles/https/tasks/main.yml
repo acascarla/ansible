@@ -1,0 +1,75 @@
+- name: apt install requirements
+  apt: 
+    name: software-properties-common
+    cache_valid_time: 3600
+
+- name: apt add repository
+  apt_repository:
+    repo: ppa:certbot/certbot
+    state: present
+
+- name: apt install certbot
+  apt: 
+    name: certbot
+    update_cache: yes
+
+- name: directory for letsencrypt
+  file:
+    path: /var/www/letsencrypt
+    owner: www-data
+    group: www-data
+    state: directory
+    mode: 0755
+
+- name: template nginx snippet to configure .well-known
+  template:
+    src: certbot-nginx.j2
+    dest: /etc/nginx/snippets/letsencrypt-acme-challenge.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload_nginx
+
+- name: blockinfile include letsencrypt conf
+  blockinfile:
+    path: '{{ nginx.sites_available_file }}'
+    marker: '# ----- {mark} ansible - include letsencrypt conf ----- #'
+    insertafter: '# include letsencrypt conf'
+    block: include /etc/nginx/snippets/letsencrypt-acme-challenge.conf;
+  notify: reload_nginx
+
+- name: generate certificate
+  command: 'certbot certonly --webroot -w /var/www/letsencrypt -d {{ certbot.domain }} --noninteractive --agree-tos --email {{ certbot.email }}'
+  notify:
+    - reload_nginx
+    - restart_vassal
+
+- name: set available customer ssl nginx site
+  template:
+    src: nginx_ssl.j2
+    dest: '{{ nginx.ssl_sites_available_file }}'
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload_nginx
+    - restart_vassal
+
+- name: set enabled customer ssl nginx site
+  file:
+    src: '{{ nginx.ssl_sites_available_file }}'
+    dest: '{{ nginx.ssl_sites_enabled_file }}'
+    state: link
+  notify:
+    - reload_nginx
+    - restart_vassal
+
+- name: blockinfile redirect http to https
+  blockinfile:
+    path: '{{ nginx.sites_available_file }}'
+    marker: '# ----- {mark} ansible - redirect http to https ----- #'
+    insertafter: '# redirect http to https'
+    block: 'return 301 https://$server_name$request_uri;'
+  notify:
+    - reload_nginx
+    - restart_vassal

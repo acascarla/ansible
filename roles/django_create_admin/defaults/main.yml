@@ -1,0 +1,4 @@
+django_admin:
+  name: admin
+  mail: '{{ mail.name }}'
+  password: '{{ django_admin_password }}'

@@ -1,0 +1,7 @@
+apt_packages:
+  - python-pip
+  - figlet
+  - libmysqlclient-dev
+
+pip_packages:
+  - setuptools

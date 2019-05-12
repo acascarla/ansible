@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "from django.contrib.auth import get_user_model; \
+get_user_model().objects.create_superuser('$1', '$2', '$3')" \
+| {{ virtualenv_folder }}/bin/python {{ virtualenv_folder }}/manage.py shell

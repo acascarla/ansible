@@ -1,0 +1,13 @@
+---
+- hosts: django
+  roles:
+    - system_user
+    - rsyslog
+    - pg_server
+    - pg_config
+    - django
+    - django_update_rsync
+    - django_create_admin
+    - uwsgi
+    - nginx
+    - https

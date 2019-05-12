@@ -1,0 +1,8 @@
+---
+- hosts: tryton
+  roles:
+    - tryton_init_db
+
+- hosts: django
+  roles:
+    - django_create_admin

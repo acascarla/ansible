@@ -1,0 +1,7 @@
+concurrent_processes: 5
+apt_packages:
+  - python3
+  - python-dev
+  - uwsgi-emperor
+  - uwsgi-plugin-python
+  - uwsgi-plugin-python3

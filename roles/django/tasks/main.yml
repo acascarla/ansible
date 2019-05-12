@@ -1,0 +1,66 @@
+- name: apt install python and pip
+  apt:
+    name: '{{ django_apt_packages }}'
+
+- name: pip django packages
+  pip:
+    name: '{{ django_pip_packages }}'
+    state: latest
+
+- name: static folder
+  file:
+    path: '{{ django_static_root }}'
+    state: directory
+    owner: '{{ system_user.name }}'
+    group: '{{ system_user.name }}'
+    mode: 0755
+
+- name: media folder
+  file:
+    path: '{{ django_media_root }}'
+    state: directory
+    owner: '{{ system_user.name }}'
+    group: '{{ system_user.name }}'
+    mode: 0755
+
+- name: directory virtualenv
+  file:
+    path: '{{ virtualenv_folder }}'
+    owner: '{{ system_user.name }}'
+    group: '{{ system_user.name }}'
+    mode: 0755
+    state: directory
+
+- name: directories wsgi socket and wsgi config
+  file:
+    path: '{{ item }}'
+    owner: '{{ system_user.name }}'
+    group: '{{ system_user.name }}'
+    mode: 0755
+    state: directory
+  with_items:
+    - '{{ venv.wsgi.socket_folder }}'
+    - '{{ venv.wsgi.config_folder }}'
+
+- name: template .env in virtualenv
+  template:
+    src: env.j2
+    dest: '{{ django_env_file }}'
+    owner: django
+    group: django
+    mode: 0644
+  notify: restart_vassal
+
+- name: .env as env var
+  blockinfile:
+    path: /etc/profile
+    marker: '# ----- {mark} ANSIBLE MANAGED BLOCK ----- #'
+    block: 'export DJANGO_ENV_FILE={{ django_env_file }}'
+
+- name: template manage.py
+  template:
+    src: manage.py.j2
+    dest: '{{ virtualenv_folder }}/manage.py'
+    owner: '{{ system_user.name }}'
+    group: '{{ system_user.name }}'
+    mode: 0755

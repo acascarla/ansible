@@ -1,0 +1,7 @@
+- name: pip uninstall package
+  become: True
+  become_user: '{{ system_user.name }}'
+  pip:
+    name: '{{ pip_django_package_name }}'
+    virtualenv: '{{ virtualenv_folder }}'
+    state: absent

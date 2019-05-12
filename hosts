@@ -1,0 +1,10 @@
+oalfonso
+localhost
+
+[crossboxpalau]
+crossboxpalau.reservations
+oalfonso.crossboxpalau
+
+[django]
+crossboxpalau.reservations
+oalfonso.crossboxpalau

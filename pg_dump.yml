@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: pg_dump
+      environment:
+        PGHOST: '{{ db_prod.host }}'
+        PGDATABASE: '{{ db_prod.name }}'
+        PGUSER: '{{ db_prod.user }}'
+        PGPASSWORD: '{{ db_prod.password }}'
+      shell: pg_dump --format=custom --no-owner {{ db_prod.name }} --file=/tmp/{{ project_name }}.dump -v

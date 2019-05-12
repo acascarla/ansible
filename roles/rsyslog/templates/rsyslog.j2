@@ -1,0 +1,10 @@
+{% if type == 'django' %}
+# Log Django generated log messages to file
+:syslogtag, isequal, "[Django]" {{ logs_folder }}/{{ project_log_file }}
+& stop
+{% endif %}
+{% if type == 'tryton' %}
+# Log tryton generated log messages to file
+:syslogtag, isequal, "[trytond]" {{ logs_folder }}/{{ project_log_file }}
+& stop
+{% endif %}

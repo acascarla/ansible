@@ -1,0 +1,4 @@
+- name: restart_vassal
+  file:
+    name: '{{ venv.wsgi.config_folder }}/{{ venv.wsgi.vassal_filename }}'
+    state: touch

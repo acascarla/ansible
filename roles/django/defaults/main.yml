@@ -1,0 +1,18 @@
+django_allowed_hosts: '*'
+django_media_url: '/media/'
+email:
+  hostname: smtp.gmail.com
+  username: '{{ mail.name }}'
+  password: '{{ mail.password }}'
+  port: "{{ mail.port | default('465') }}"
+  uses_tls: "{{ mail.uses_tls | default('False') }}"
+  uses_ssl: "{{ mail.uses_ssl | default('True') }}"
+django_pip_packages:
+  - virtualenv
+  - setuptools
+  - cffi
+  - psycopg2-binary
+django_apt_packages:
+  - python3
+  - python3-pip
+django_env_custom_vars: ''

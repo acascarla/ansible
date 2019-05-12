@@ -1,0 +1,21 @@
+[uwsgi]
+plugin = {{ wsgi_python_plugin }}
+master = true
+processes = {{ concurrent_processes }}
+socket = {{ venv.wsgi.socket_folder }}/{{ venv.wsgi.socket_name }}
+virtualenv = {{ virtualenv_folder }}
+uid = {{ system_user.name }}
+gid = {{ system_user.name }}
+logto = {{ logs_folder }}/{{ wsgi_log_file }}
+
+# allowing nginx to access
+chmod-socket = 666
+
+# removes the socket when process stops
+vacuum = true
+
+# kill when ends, not reload
+die-on-term=true
+
+# Custom configuration
+{{ wsgi_vassal_custom_vars }}

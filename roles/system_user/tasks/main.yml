@@ -1,0 +1,6 @@
+- name: create system user
+  user:
+    name: '{{ system_user.name }}'
+    shell: /bin/bash
+    createhome: True
+    home: '{{ system_user.home }}'

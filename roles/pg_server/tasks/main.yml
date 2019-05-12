@@ -1,0 +1,34 @@
+- name: stop postgres
+  service:
+    name: postgresql
+    state: stopped
+  register: command_result
+  failed_when: "command_result is failed and ('find' not in command_result.msg and 'found' not in command_result.msg)"
+
+- name: apt install postgres packages
+  apt:
+    name: '{{ apt_packages }}'
+
+- name: start postgres
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: pip install postgres packages
+  pip:
+    name: '{{ pip_packages }}'
+
+- name: all connections pg_hba.conf
+  lineinfile:
+    dest: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+    insertafter: EOF
+    line: host    all             all  0.0.0.0/0            md5
+  notify: restart_postgresql
+
+- name: all connections postgresql.conf
+  lineinfile:
+    dest: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf
+    insertafter: '# - Connection Settings -'
+    line: listen_addresses = '*'
+  notify: restart_postgresql

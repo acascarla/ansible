@@ -1,0 +1,5 @@
+---
+- hosts: django
+  roles:
+    - django_uninstall_package
+    - django_update_rsync

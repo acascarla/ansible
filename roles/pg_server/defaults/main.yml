@@ -1,0 +1,8 @@
+apt_packages:
+  - python-psycopg2
+  - postgresql
+  - postgresql-server-dev-all
+pip_packages:
+  - psycopg2-binary
+postgres_version: 10
+ubuntu_codename: xenial

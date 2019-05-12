@@ -1,0 +1,13 @@
+- name: remove non-needed files
+  file:
+    path: /etc/update-motd.d/{{ item }}
+    state: absent
+  with_items:
+    - 10-help-text
+    - 51-cloudguest
+
+- name: set servername in motd
+  lineinfile:
+    path: /etc/update-motd.d/00-header
+    regexp: '^figlet'
+    line: figlet "{{ project_name }}"

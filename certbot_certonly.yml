@@ -1,0 +1,7 @@
+- name: generate certificate
+  command: 'certbot certonly --webroot -w /var/www/letsencrypt -d {{ certbot.domain }} --noninteractive --agree-tos --email {{ certbot.email }}'
+
+- name: reload_nginx
+  service:
+    name: nginx
+    state: reloaded

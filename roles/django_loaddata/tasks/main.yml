@@ -1,0 +1,6 @@
+- name: django loaddata
+  django_manage:
+    command: loaddata
+    app_path: '{{ virtualenv_folder }}'
+    virtualenv: '{{ virtualenv_folder }}'
+    fixtures: '{{ fixtures }}'

@@ -1,0 +1,11 @@
+- name: template adduser script
+  template:
+    src: adduser.j2
+    dest: '{{ virtualenv_folder }}/adduser-to-django.sh'
+    owner: '{{ system_user.name }}'
+    group: '{{ system_user.name }}'
+    mode: 0511
+
+- name: create django admin user
+  command: 'bash {{ virtualenv_folder }}/adduser-to-django.sh {{ django_admin.name }} {{ django_admin.mail }} {{ django_admin.password }}'
+  ignore_errors: yes

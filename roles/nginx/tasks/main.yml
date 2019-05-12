@@ -1,0 +1,45 @@
+- name: apt install nginx
+  apt:
+    name: nginx
+
+- name: remove default enabled site
+  file:
+    dest: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload_nginx
+
+- name: remove default available site
+  file:
+    dest: /etc/nginx/sites-available/default
+    state: absent
+  notify: reload_nginx
+
+- name: template site available
+  template:
+    src: nginx.j2
+    dest: '{{ nginx.sites_available_file }}'
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload_nginx
+
+- name: link site enabled
+  file:
+    src: '{{ nginx.sites_available_file }}'
+    dest: '{{ nginx.sites_enabled_file }}'
+    state: link
+  notify: reload_nginx
+
+- name: blockinfile update nginx.conf
+  blockinfile:
+    path: /etc/nginx/nginx.conf
+    marker: '## -- {mark} ansible - gzip conf -- ##'
+    insertafter: 'gzip on;'
+    block: |
+        gzip_vary on;
+        gzip_proxied any;
+        gzip_comp_level 6;
+        gzip_buffers 16 8k;
+        gzip_http_version 1.1;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+  notify: reload_nginx

@@ -1,0 +1,31 @@
+- name: template default index.html
+  template:
+    src: index.html
+    dest: /var/www/
+    owner: root
+    group: root
+    mode: 0644
+
+- name: copy image for default index.html
+  copy:
+    src: calidae.png
+    dest: /var/www/
+    owner: root
+    group: root
+    mode: 0644
+
+- name: template custom default site available
+  template:
+    src: _.conf
+    dest: '{{ nginx.default_sites_available_file }}'
+    owner: root
+    group: root
+    mode: 0644
+  notify: reload_nginx
+
+- name: link custom default site enabled
+  file:
+    src: '{{ nginx.default_sites_available_file }}'
+    dest: '{{ nginx.default_sites_enabled_file }}'
+    state: link
+  notify: reload_nginx

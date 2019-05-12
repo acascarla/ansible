@@ -1,0 +1,4 @@
+- name: 'restart emperor'
+  service:
+    name: uwsgi-emperor
+    state: restarted
